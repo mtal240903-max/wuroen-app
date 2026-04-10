@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [unreadCount, setUnreadCount] = useState(0); 
   const [collabCount, setCollabCount] = useState(0); 
 
-  const API_BASE_URL = "https://wuroen-api.onrender.com/api";
+  const API_BASE_URL = "https://wuroen-api.onrender.com";
 
   useEffect(() => {
     loadStorageData();
