@@ -55,12 +55,12 @@ export default function UserProfileScreen({ route, navigation }) {
   }, [loadData]);
 
   const fetchProfile = async () => {
-    const res = await axios.get(`http://192.168.115.239:5000/api/users/${userId}`);
+    const res = await axios.get(`https://wuroen-api.onrender.com/api/users/${userId}`);
     if (res.data) setProfile(res.data);
   };
 
   const checkCollabStatus = async () => {
-    const res = await axios.get(`http://192.168.115.239:5000/api/collaborations/status/${userId}`, {
+    const res = await axios.get(`https://wuroen-api.onrender.com/api/collaborations/status/${userId}`, {
       headers: { Authorization: `Bearer ${userToken}` }
     });
     setCollabStatus(res.data.status);
@@ -79,7 +79,7 @@ export default function UserProfileScreen({ route, navigation }) {
       if (collabStatus === 'none') {
         // ENVOYER UNE DEMANDE
         await axios.post(
-          `http://192.168.115.239:5000/api/collaborations/request`, 
+          `https://wuroen-api.onrender.com/api/collaborations/request`, 
           { receiverId: userId },
           { headers: { Authorization: `Bearer ${userToken}` } }
         );
@@ -99,7 +99,7 @@ export default function UserProfileScreen({ route, navigation }) {
               text: "Confirmer", 
               style: "destructive", 
               onPress: async () => {
-                await axios.delete(`http://192.168.115.239:5000/api/collaborations/terminate/${userId}`, {
+                await axios.delete(`https://wuroen-api.onrender.com/api/collaborations/terminate/${userId}`, {
                   headers: { Authorization: `Bearer ${userToken}` }
                 });
                 setCollabStatus('none');

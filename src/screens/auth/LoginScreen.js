@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       // Rappel : Utilise l'IP de ton PC si tu es sur un vrai téléphone
-      const response = await axios.post('http://192.168.115.239:5000/api/auth/login', {
+      const response = await axios.post('https://wuroen-api.onrender.com/api/auth/login', {
         email,
         password,
       });

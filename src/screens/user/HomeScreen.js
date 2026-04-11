@@ -102,7 +102,7 @@ export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const API_URL = 'http://192.168.115.239:5000/api/articles';
+ const API_URL = 'https://wuroen-api.onrender.com/api/articles';
 
   const fetchArticles = async () => {
     try {

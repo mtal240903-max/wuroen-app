@@ -42,7 +42,7 @@ export default function ArticleDetailScreen({ navigation, route }) {
     const incrementView = async () => {
       try {
         // Appel de la nouvelle route PUT pour les vues
-        await axios.put(`http://192.168.115.239:5000/api/articles/view/${article._id}`);
+        await axios.put(`https://wuroen-api.onrender.com/api/articles/view/${article._id}`);
       } catch (error) {
         console.error("Erreur lors de l'incrémentation de la vue:", error);
       }
@@ -75,7 +75,7 @@ export default function ArticleDetailScreen({ navigation, route }) {
 
       if (result.action === Share.sharedAction) {
         // On incrémente le partage en base de données seulement si le partage est validé
-        await axios.post(`http://192.168.115.239:5000/api/articles/${article._id}/share`);
+        await axios.post(`https://wuroen-api.onrender.com/api/articles/${article._id}/share`);
       }
     } catch (error) {
       console.error("Erreur partage:", error);
@@ -102,7 +102,7 @@ export default function ArticleDetailScreen({ navigation, route }) {
     setIsSending(true);
     try {
       const response = await axios.post(
-        `http://192.168.115.239:5000/api/articles/${article._id}/comments`, 
+        `https://wuroen-api.onrender.com/api/articles/${article._id}/comments`, 
         { text: commentText },
         { headers: { Authorization: `Bearer ${userToken}` } }
       );

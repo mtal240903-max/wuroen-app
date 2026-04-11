@@ -18,8 +18,7 @@ export default function ChatDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const flatListRef = useRef();
 
-  const API_URL = "http://192.168.115.239:5000/api/messages";
-
+  const API_URL = "https://wuroen-api.onrender.com/api/messages";
   // 1. Charger l'historique et marquer comme lu
   const fetchMessages = useCallback(async (isInitial = false) => {
     try {

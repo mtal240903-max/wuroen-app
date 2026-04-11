@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
   // Utilise ton lien Render avec /api à la fin
-  baseURL: 'https://wuroen-api.onrender.com', 
+  baseURL: 'https://wuroen-api.onrender.com/api', 
   timeout: 15000, // On augmente un peu car Render (gratuit) peut être lent à se réveiller
 });
 

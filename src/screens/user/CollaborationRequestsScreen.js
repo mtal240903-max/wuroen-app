@@ -29,7 +29,7 @@ export default function CollaborationRequestsScreen({ navigation }) {
     try {
       // NOUVELLE LOGIQUE : On récupère les collaborations 'pending' où je suis le destinataire
       // Note : Assure-toi d'avoir une route GET /api/collaborations/pending côté backend
-      const res = await axios.get('http://192.168.115.239:5000/api/collaborations/pending', {
+      const res = await axios.get('https://wuroen-api.onrender.com/api/collaborations/pending', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       setRequests(res.data);
@@ -45,7 +45,7 @@ export default function CollaborationRequestsScreen({ navigation }) {
     try {
       // Utilisation de la nouvelle route PUT /api/collaborations/respond/:collabId
       await axios.put(
-        `http://192.168.115.239:5000/api/collaborations/respond/${collabId}`,
+        `https://wuroen-api.onrender.com/api/collaborations/respond/${collabId}`,
         { status }, // 'accepted' ou 'rejected'
         { headers: { Authorization: `Bearer ${userToken}` } }
       );

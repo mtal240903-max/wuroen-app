@@ -62,7 +62,7 @@ export default function ProfileScreen({ navigation }) {
     if (!userToken) return;
     try {
       // 1. Récupération des stats de contenu (Articles, Vues, Likes)
-      const response = await axios.get('http://192.168.115.239:5000/api/users/me/stats', {
+      const response = await axios.get('https://wuroen-api.onrender.com/api/users/me/stats', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       

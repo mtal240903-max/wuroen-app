@@ -88,7 +88,7 @@ export default function InboxScreen({ navigation }) {
   // Récupération des conversations depuis l'API Inbox
   const fetchConversations = async () => {
     try {
-      const response = await axios.get('http://192.168.115.239:5000/api/messages/inbox', {
+      const response = await axios.get('https://wuroen-api.onrender.com/api/messages/inbox', {
         headers: { Authorization: `Bearer ${userToken}` }
       });
       setChats(response.data);

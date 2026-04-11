@@ -29,7 +29,7 @@ export default function RegisterScreen({ navigation }) {
        * - iOS Simulator : localhost
        * - Téléphone physique : Ton IP locale (ex: 192.168.1.x)
        */
-      const response = await axios.post('http://192.168.115.239:5000/api/auth/register', {
+      const response = await axios.post('https://wuroen-api.onrender.com/api/auth/register', {
         name,
         email,
         password,

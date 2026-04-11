@@ -88,7 +88,7 @@ export default function CreateArticleScreen({ navigation }) {
 
     try {
       // Vérifie bien que cette IP est toujours celle de ton PC
-      const response = await axios.post('http://192.168.115.239:5000/api/articles', formData, {
+      const response = await axios.post('https://wuroen-api.onrender.com/api/articles', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           // CORRECTION : On utilise la variable userToken récupérée plus haut
