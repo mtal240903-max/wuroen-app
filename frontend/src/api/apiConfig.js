@@ -1,12 +1,18 @@
-// Configuration de l'API pour le développement et la production
-const API_URLS = {
-  development: 'http://192.168.38.154:5000/api', // Ton IP locale pour les tests rapides
-  production: 'https://wuroen-backend.onrender.com/api' // Ton serveur en ligne sur Render
+// Configuration de l'API pour Render
+export const BASE_URL = 'https://wuroen-app.onrender.com/api';
+
+export const ENDPOINTS = {
+  login: `${BASE_URL}/auth/login`,
+  register: `${BASE_URL}/auth/register`,
+  articles: `${BASE_URL}/articles`,
+  messages: `${BASE_URL}/messages`,
+  collaborations: `${BASE_URL}/collaborations`,
+  library: `${BASE_URL}/library`,
+  users: `${BASE_URL}/users`,
 };
 
-// Change cette variable sur 'production' quand tu veux tester la version en ligne
-const CURRENT_ENV = 'production'; 
-
-const API_BASE_URL = API_URLS[CURRENT_ENV];
-
+// Export par défaut au cas où un composant l'utiliserait sous ce nom
+const API_BASE_URL = BASE_URL;
 export default API_BASE_URL;
+
+

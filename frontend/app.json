@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Wuro'en",
+    "slug": "wuroen-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,13 +21,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.mtal.frontend",
+      "package": "com.mtal.wuroen",
       "usesCleartextTraffic": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    
     "plugins": [
       [
         "expo-notifications",
@@ -36,6 +35,12 @@
           "color": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "76d3bed7-e1f3-46a7-ae09-d55699002793"
+      }
+    },
+    "owner": "mtal"
   }
 }

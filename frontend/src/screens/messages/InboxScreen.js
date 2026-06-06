@@ -180,7 +180,6 @@ export default function InboxScreen({ navigation }) {
   const [isSheetVisible, setIsSheetVisible] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const activeChatId = useRef(null);
   const isMounted = useRef(true);
 
   const totalUnread = useMemo(() => {
@@ -199,7 +198,7 @@ export default function InboxScreen({ navigation }) {
     }
   }, [totalUnread, navigation]);
 
-  // 📥 Base d'initialisation API
+  // 📥 Récupération des conversations
   const fetchConversations = useCallback(async (showGlobalLoader = false) => {
     if (showGlobalLoader) setLoading(true);
     try {
@@ -228,50 +227,51 @@ export default function InboxScreen({ navigation }) {
     }
   }, []);
 
-  // 🔄 Chargement au focus
+  // 🔄 Écoute du Focus
   useFocusEffect(
     useCallback(() => {
       isMounted.current = true;
-      activeChatId.current = null;
       fetchConversations(isInitialLoad);
       return () => { isMounted.current = false; };
     }, [fetchConversations, isInitialLoad])
   );
 
-  // ⚡ Écouteurs Temps Réel (Mise à jour réactive instantanée sans rechargement)
+  // ⚡ Réception Socket réactive synchrone et sans intermédiaire API
   useEffect(() => {
     if (!global.socket) return;
-    if (global.currentUser?._id) global.socket.emit('register_user', global.currentUser._id);
+    
+    if (global.currentUser?._id) {
+      global.socket.emit('register_user', global.currentUser._id);
+    }
 
     const handleNewMessage = (newMessage) => {
-      setChats((prevChats) => {
-        const isGroup = !!newMessage.groupId;
-        const targetId = isGroup ? newMessage.groupId : newMessage.sender;
-        
-        // On ignore si c'est notre propre message envoyé depuis un autre composant
-        if (newMessage.sender === global.currentUser?._id) return prevChats;
+      // 1. Ignorer les messages que l'utilisateur connecté envoie lui-même
+      if (newMessage.sender === global.currentUser?._id) return;
 
-        const isCurrentlyViewing = activeChatId.current === targetId;
-        const chatIndex = prevChats.findIndex(c => 
+      const isGroup = !!newMessage.groupId;
+      const targetId = isGroup ? newMessage.groupId : newMessage.sender;
+
+      setChats((prevChats) => {
+        const updatedChats = [...prevChats];
+        const chatIndex = updatedChats.findIndex(c => 
           (isGroup && c._id === targetId) || (!isGroup && c.contact?._id === targetId)
         );
 
-        const updatedChats = [...prevChats];
-
         if (chatIndex !== -1) {
-          // La conversation existe déjà : mise à jour réactive directe
+          // La ligne existe : on extrait les compteurs actuels proprement
           const currentUnread = updatedChats[chatIndex].unreadCount !== undefined 
             ? updatedChats[chatIndex].unreadCount 
             : (updatedChats[chatIndex].unread || 0);
 
+          // On met à jour directement l'item existant
           updatedChats[chatIndex] = {
             ...updatedChats[chatIndex],
             lastMessage: newMessage.content,
-            date: new Date().toISOString(), // Date système instantanée
-            unreadCount: isCurrentlyViewing ? 0 : currentUnread + 1
+            date: new Date().toISOString(),
+            unreadCount: currentUnread + 1 // Incrémentation dynamique visible immédiatement
           };
         } else {
-          // Nouvelle discussion initiée : ajout dynamique en haut de pile
+          // La ligne n'existe pas encore : création de l'élément à la volée en haut de liste
           updatedChats.unshift({
             _id: isGroup ? targetId : undefined,
             contact: isGroup ? undefined : { 
@@ -279,13 +279,15 @@ export default function InboxScreen({ navigation }) {
               name: newMessage.senderName || "Nouvel Expert",
               avatarUrl: newMessage.senderAvatar || newMessage.senderPhoto || null
             },
+            name: isGroup ? (newMessage.groupName || "Nouveau Groupe") : undefined,
             lastMessage: newMessage.content,
             date: new Date().toISOString(),
-            unreadCount: isCurrentlyViewing ? 0 : 1,
+            unreadCount: 1,
             isGroup: isGroup
           });
         }
-        // Tri instantané par ordre chronologique
+
+        // Tri immédiat pour faire remonter le nouveau message tout en haut
         return updatedChats.sort((a, b) => new Date(b.date) - new Date(a.date));
       });
     };
@@ -297,7 +299,7 @@ export default function InboxScreen({ navigation }) {
       global.socket.off('new_private_message', handleNewMessage);
       global.socket.off('new_group_message', handleNewMessage);
     };
-  }, []); // Retrait des dépendances réseau pour figer l'écouteur en mode réactif direct
+  }, [global.currentUser?._id]); // Re-bind automatique si l'ID utilisateur change
 
   const smartCollaborators = useMemo(() => {
     const seen = new Set();
