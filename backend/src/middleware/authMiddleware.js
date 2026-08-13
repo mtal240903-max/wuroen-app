@@ -48,7 +48,25 @@ const protect = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 2. AUTHORIZE — Filtrage par rôle(s)
+// 2. SUPERADMIN — Réservé au Super Admin (Corrigé)
+// ─────────────────────────────────────────────────────────────
+const superAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: "Authentification requise." });
+  }
+
+  if (req.user.role === 'superadmin') {
+    return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: "Accès refusé. Réservé au Super Admin."
+  });
+};
+
+// ─────────────────────────────────────────────────────────────
+// 3. AUTHORIZE — Filtrage par rôle(s)
 // ─────────────────────────────────────────────────────────────
 const authorize = (...allowedRoles) => {
   return (req, res, next) => {
@@ -67,7 +85,7 @@ const authorize = (...allowedRoles) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 3. AUTHORIZE ADMIN TYPE — Spécialisation Admin
+// 4. AUTHORIZE ADMIN TYPE — Spécialisation Admin
 // ─────────────────────────────────────────────────────────────
 const authorizeAdminType = (...allowedTypes) => {
   return (req, res, next) => {
@@ -88,7 +106,7 @@ const authorizeAdminType = (...allowedTypes) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 4. CHECK EXPERT ACCESS — Certification
+// 5. CHECK EXPERT ACCESS — Certification
 // ─────────────────────────────────────────────────────────────
 const checkExpertAccess = (req, res, next) => {
   if (!req.user) return res.status(401).json({ message: "Authentification requise." });
@@ -102,4 +120,4 @@ const checkExpertAccess = (req, res, next) => {
   });
 };
 
-module.exports = { protect, authorize, authorizeAdminType, checkExpertAccess };
+module.exports = { protect, superAdmin, authorize, authorizeAdminType, checkExpertAccess };

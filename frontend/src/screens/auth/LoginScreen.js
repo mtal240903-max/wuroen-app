@@ -1,21 +1,25 @@
 import React, { useState, useContext } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, StyleSheet, 
-  KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert, ActivityIndicator, StatusBar 
+  KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert, ActivityIndicator, StatusBar, useWindowDimensions 
 } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import { COLORS } from '../../theme/theme';
-import { LogIn, Mail, Lock, Sparkles } from 'lucide-react-native';
+import { LogIn, Mail, Lock, Sparkles, ShieldCheck } from 'lucide-react-native';
 
 // ✅ Importation de la configuration centrale
 import { ENDPOINTS } from '../../api/apiConfig';
 
 export default function LoginScreen({ navigation }) {
+  const { width } = useWindowDimensions();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
+
+  // Breakpoint pour basculer sur le layout PC/Tablette
+  const isLargeScreen = width >= 850;
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -25,14 +29,11 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // ✅ Utilisation de l'endpoint centralisé
       const response = await axios.post(ENDPOINTS.login, { email, password });
-      
       const { token, ...userData } = response.data;
       
       // Initialisation de la session
       login(token, userData);
-      
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Échec de l'authentification (Vérifiez votre connexion au serveur).";
       Alert.alert("Accès refusé", errorMsg);
@@ -48,76 +49,103 @@ export default function LoginScreen({ navigation }) {
     >
       <StatusBar barStyle="light-content" />
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>
+        <View style={[styles.inner, isLargeScreen && styles.rowLayout]}>
           
-          <View style={styles.header}>
-            <View style={styles.iconCircle}>
-               <Sparkles color={COLORS.primary} size={32} />
-            </View>
-            <Text style={styles.logo}>Wuro’en</Text>
-            <Text style={styles.subtitle}>Réseau Scientifique & Technique</Text>
-          </View>
-
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>IDENTIFIANT</Text>
-              <View style={styles.inputWrapper}>
-                <Mail size={18} color="#475569" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="nom@exemple.com"
-                  placeholderTextColor="#475569"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
+          {/* BANNER LATÉRALE GAUCHE : Visible uniquement sur PC / Tablette */}
+          {isLargeScreen && (
+            <View style={styles.leftSidebar}>
+              <View style={styles.sidebarBlurContent}>
+                <View style={styles.sidebarIconCircle}>
+                  <ShieldCheck color={COLORS.primary} size={40} />
+                </View>
+                <Text style={styles.sidebarTitle}>Espace Sécurisé</Text>
+                <Text style={styles.sidebarSubtitle}>
+                  Connectez-vous pour accéder à vos archives de recherche, synchroniser vos modules d'apprentissage et gérer vos outils connectés.
+                </Text>
+                <View style={styles.sidebarFooter}>
+                  <Text style={styles.sidebarFooterText}>Wuro’en Écosystème v2.0</Text>
+                </View>
               </View>
             </View>
+          )}
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>MOT DE PASSE</Text>
-              <View style={styles.inputWrapper}>
-                <Lock size={18} color="#475569" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor="#475569"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
+          {/* CONTENU PRINCIPAL (Formulaire) */}
+          <View style={[styles.mainContent, isLargeScreen && styles.mainContentDesktop]}>
+            <View style={[styles.formWrapper, isLargeScreen && { maxWidth: 450 }]}>
+              
+              <View style={styles.header}>
+                <View style={styles.iconCircle}>
+                   <Sparkles color={COLORS.primary} size={32} />
+                </View>
+                <Text style={styles.logo}>Wuro’en</Text>
+                <Text style={styles.subtitle}>Réseau Scientifique & Technique</Text>
               </View>
+
+              <View style={styles.form}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>IDENTIFIANT</Text>
+                  <View style={styles.inputWrapper}>
+                    <Mail size={18} color="#475569" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="nom@exemple.com"
+                      placeholderTextColor="#475569"
+                      value={email}
+                      onChangeText={setEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>MOT DE PASSE</Text>
+                  <View style={styles.inputWrapper}>
+                    <Lock size={18} color="#475569" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="••••••••"
+                      placeholderTextColor="#475569"
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry
+                    />
+                  </View>
+                </View>
+
+                <TouchableOpacity 
+                  style={[styles.button, loading && styles.buttonDisabled]} 
+                  onPress={handleLogin}
+                  disabled={loading}
+                  activeOpacity={0.8}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonText}>Initialiser la session</Text>
+                      <LogIn color="#FFF" size={20} />
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.link} 
+                  onPress={() => navigation.navigate('Register')}
+                >
+                  <Text style={styles.linkTextRegular}>Nouveau chercheur ? </Text>
+                  <Text style={styles.linkTextBold}>Rejoindre le réseau</Text>
+                </TouchableOpacity>
+              </View>
+              
             </View>
 
-            <TouchableOpacity 
-              style={[styles.button, loading && styles.buttonDisabled]} 
-              onPress={handleLogin}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <>
-                  <Text style={styles.buttonText}>Initialiser la session</Text>
-                  <LogIn color="#FFF" size={20} />
-                </>
-              )}
-            </TouchableOpacity>
+            {/* Crédits en bas */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Powered by MTal Studio</Text>
+            </View>
+          </View>
 
-            <TouchableOpacity 
-              style={styles.link} 
-              onPress={() => navigation.navigate('Register')}
-            >
-              <Text style={styles.linkTextRegular}>Nouveau chercheur ? </Text>
-              <Text style={styles.linkTextBold}>Rejoindre le réseau</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Powered by MTal Studio</Text>
-          </View>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -126,23 +154,51 @@ export default function LoginScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#020617' },
-  inner: { flex: 1, padding: 30, justifyContent: 'center' },
+  inner: { flex: 1 },
+  rowLayout: { flexDirection: 'row' },
+  
+  // Panneau gauche PC
+  leftSidebar: { 
+    flex: 1, 
+    backgroundColor: '#070d1e', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    padding: 40,
+    borderRightWidth: 1,
+    borderColor: '#16223f'
+  },
+  sidebarBlurContent: { width: '100%', maxWidth: 400, alignItems: 'center' },
+  sidebarIconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(37, 99, 235, 0.08)', justifyContent: 'center', alignItems: 'center', marginBottom: 25, borderWidth: 1, borderColor: '#16223f' },
+  sidebarTitle: { fontSize: 28, fontWeight: '900', color: '#FFF', marginBottom: 15 },
+  sidebarSubtitle: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 22 },
+  sidebarFooter: { position: 'absolute', bottom: -150 },
+  sidebarFooterText: { color: '#334155', fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+
+  // Panneau droit / Contenu principal
+  mainContent: { flex: 1, padding: 30, justifyContent: 'center', alignItems: 'center' },
+  mainContentDesktop: { flex: 1.2, backgroundColor: '#020617' },
+  formWrapper: { width: '100%', justifyContent: 'center' },
+
   header: { alignItems: 'center', marginBottom: 40 },
   iconCircle: { width: 70, height: 70, borderRadius: 35, backgroundColor: COLORS.primary + '15', justifyContent: 'center', alignItems: 'center', marginBottom: 15 },
   logo: { fontSize: 36, fontWeight: '900', color: '#FFF', letterSpacing: -1 },
   subtitle: { fontSize: 13, color: '#64748B', marginTop: 5, fontWeight: '600', letterSpacing: 0.5 },
+  
   form: { backgroundColor: '#0F172A', padding: 25, borderRadius: 25, borderWidth: 1, borderColor: '#1E293B' },
   inputContainer: { marginBottom: 20 },
   label: { fontSize: 10, fontWeight: '900', color: COLORS.primary, marginBottom: 10, letterSpacing: 1.5 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#020617', borderRadius: 12, borderWidth: 1, borderColor: '#1E293B', paddingHorizontal: 15 },
   inputIcon: { marginRight: 12 },
   input: { flex: 1, paddingVertical: 15, fontSize: 15, color: '#F8FAFC' },
+  
   button: { backgroundColor: COLORS.primary, padding: 18, borderRadius: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10, gap: 12, shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#FFF', fontSize: 16, fontWeight: '800' },
+  
   link: { marginTop: 25, flexDirection: 'row', justifyContent: 'center' },
   linkTextRegular: { color: '#64748B', fontSize: 14 },
   linkTextBold: { color: COLORS.primary, fontSize: 14, fontWeight: '800' },
+  
   footer: { position: 'absolute', bottom: 40, left: 0, right: 0, alignItems: 'center' },
   footerText: { color: '#1E293B', fontSize: 10, fontWeight: '800', letterSpacing: 1 }
 });

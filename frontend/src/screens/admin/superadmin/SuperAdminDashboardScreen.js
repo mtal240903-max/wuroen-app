@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, StatusBar 
 } from 'react-native';
 import { 
-  ShieldAlert, Users, LayoutGrid, Database, Activity, ChevronRight, Settings, Cpu, HardDrive
+  ShieldAlert, Users, LayoutGrid, Database, Activity, ChevronRight, Settings, Cpu, HardDrive, Wrench
 } from 'lucide-react-native';
 import { COLORS } from '../../../theme/theme';
 
@@ -12,7 +12,7 @@ const SuperAdminCard = ({ title, sub, icon: Icon, color, onPress }) => (
   <TouchableOpacity 
     style={styles.card} 
     onPress={onPress} 
-    activeOpacity={0.7} // Meilleur feedback visuel
+    activeOpacity={0.7}
   >
     <View style={[styles.iconBox, { backgroundColor: color + '15' }]}>
       <Icon color={color} size={24} />
@@ -59,6 +59,14 @@ export default function SuperAdminDashboardScreen({ navigation }) {
           />
 
           <SuperAdminCard 
+            title="Gestion des Outils"
+            sub="Vitrine et configuration des outils système"
+            icon={Wrench}
+            color="#06B6D4"
+            onPress={() => navigation.navigate('AdminToolsManager')} 
+          />
+
+          <SuperAdminCard 
             title="Analyse du Stockage"
             sub="Volumes Cloudinary & MongoDB"
             icon={HardDrive}
@@ -79,7 +87,6 @@ export default function SuperAdminDashboardScreen({ navigation }) {
             sub="Rôles experts et accès spéciaux"
             icon={Users}
             color="#EC4899"
-            // 🛠 CORRECTION : Vérifie bien que ce nom correspond à celui de ton App.js / RootNavigation.js
             onPress={() => navigation.navigate('UsersManagement')} 
           />
 

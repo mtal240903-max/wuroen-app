@@ -1,7 +1,8 @@
 const express     = require('express');
 const router      = express.Router();
 const rateLimit   = require('express-rate-limit');
-const { register, login, refreshToken, logout } = require('../controllers/authController');
+// Import de connectToHira en plus des fonctions existantes depuis authController
+const { register, login, refreshToken, logout, connectToHira } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 // ─────────────────────────────────────────────────────────────
@@ -14,7 +15,7 @@ const { protect } = require('../middleware/authMiddleware');
  * Si un attaquant essaie 1000 mots de passe → bloqué après 10
  */
 const authLimiter = rateLimit({
-  windowMs:         15 * 60 * 1000, // 15 minutes
+  windowMs:        15 * 60 * 1000, // 15 minutes
   max:              10,
   standardHeaders:  true,           // Renvoie les headers RateLimit-* standard
   legacyHeaders:    false,
@@ -57,5 +58,10 @@ router.post('/refresh', refreshLimiter, refreshToken);
 // @desc    Déconnexion — efface le cookie refresh token
 // @access  Privé (doit être connecté pour se déconnecter proprement)
 router.post('/logout', protect, logout);
+
+// @route   GET /api/auth/connect
+// @desc    Passerelle SSO / Redirection d'authentification cross-site vers Hira
+// @access  Public (vérifie le cookie HttpOnly de session)
+router.get('/connect', connectToHira);
 
 module.exports = router;

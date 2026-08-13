@@ -12,6 +12,13 @@ const GroupSchema = new mongoose.Schema({
     trim: true 
   },
 
+  // 🔗 MISE À JOUR : Liaison obligatoire avec la Communauté parente
+  communityId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Community', 
+    required: true 
+  },
+
   avatar: { 
     type: String, 
     default: "" 
@@ -43,7 +50,6 @@ const GroupSchema = new mongoose.Schema({
     default: false
   },
 
-  // ✅ AJOUT IMPORTANT
   lastMessage: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Message',
@@ -54,6 +60,7 @@ const GroupSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-GroupSchema.index({ members: 1, updatedAt: -1 });
+// Index composé pour optimiser la recherche des groupes par communauté
+GroupSchema.index({ communityId: 1, members: 1, updatedAt: -1 });
 
 module.exports = mongoose.models.Group || mongoose.model('Group', GroupSchema);

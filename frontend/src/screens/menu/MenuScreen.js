@@ -28,8 +28,8 @@ export default function MenuScreen({ navigation }) {
 
     // 2. Tenter la navigation
     try {
-      // Si l'écran est un onglet, on utilise la syntaxe imbriquée
-      const isTab = ['Profil', 'Biblio'].includes(screenName);
+      // Modification : Seul 'Profil' reste un onglet principal en bas. 'Library' est maintenant géré par le Stack global.
+      const isTab = ['Profil'].includes(screenName);
       
       if (isTab) {
         navigation.navigate('Main', { screen: screenName });
@@ -45,7 +45,8 @@ export default function MenuScreen({ navigation }) {
   const menuItems = [
     { title: "Profil", icon: <User color={COLORS.primary} size={24} />, screen: 'Profil' },
     { title: "Collaborations", icon: <Users color="#22C55E" size={24} />, screen: 'CollaborationRequests' },
-    { title: "Bibliothèque", icon: <BookOpen color="#E2E8F0" size={24} />, screen: 'Biblio' },
+    // Modification : 'Biblio' est remplacé par 'Library' pour correspondre à la route globale définie dans AppNavigator
+    { title: "Bibliothèque", icon: <BookOpen color="#E2E8F0" size={24} />, screen: 'Library' },
     { title: "Réglages", icon: <Settings color="#64748B" size={24} />, screen: 'Settings' }
   ];
 
@@ -99,9 +100,7 @@ export default function MenuScreen({ navigation }) {
   );
 }
 
-
 const styles = StyleSheet.create({
-  // ... garde tes styles actuels, ils sont parfaits
   container: { flex: 1, backgroundColor: '#020617' },
   header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
   headerTitle: { color: '#FFF', fontSize: 20, fontWeight: '800' },

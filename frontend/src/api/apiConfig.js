@@ -1,4 +1,5 @@
-// Configuration de l'API pour Render
+// Configuration de l'API pour le développement LOCAL
+// Remplace '192.168.1.XX' par l'adresse IP locale de ton ordinateur
 export const BASE_URL = 'https://wuroen-app.onrender.com/api';
 
 export const ENDPOINTS = {
@@ -11,8 +12,5 @@ export const ENDPOINTS = {
   users: `${BASE_URL}/users`,
 };
 
-// Export par défaut au cas où un composant l'utiliserait sous ce nom
 const API_BASE_URL = BASE_URL;
 export default API_BASE_URL;
-
-

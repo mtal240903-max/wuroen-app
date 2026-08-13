@@ -198,7 +198,6 @@ export default function InboxScreen({ navigation }) {
     }
   }, [totalUnread, navigation]);
 
-  // 📥 Récupération des conversations
   const fetchConversations = useCallback(async (showGlobalLoader = false) => {
     if (showGlobalLoader) setLoading(true);
     try {
@@ -227,7 +226,6 @@ export default function InboxScreen({ navigation }) {
     }
   }, []);
 
-  // 🔄 Écoute du Focus
   useFocusEffect(
     useCallback(() => {
       isMounted.current = true;
@@ -236,7 +234,6 @@ export default function InboxScreen({ navigation }) {
     }, [fetchConversations, isInitialLoad])
   );
 
-  // ⚡ Réception Socket réactive synchrone et sans intermédiaire API
   useEffect(() => {
     if (!global.socket) return;
     
@@ -245,7 +242,6 @@ export default function InboxScreen({ navigation }) {
     }
 
     const handleNewMessage = (newMessage) => {
-      // 1. Ignorer les messages que l'utilisateur connecté envoie lui-même
       if (newMessage.sender === global.currentUser?._id) return;
 
       const isGroup = !!newMessage.groupId;
@@ -258,20 +254,17 @@ export default function InboxScreen({ navigation }) {
         );
 
         if (chatIndex !== -1) {
-          // La ligne existe : on extrait les compteurs actuels proprement
           const currentUnread = updatedChats[chatIndex].unreadCount !== undefined 
             ? updatedChats[chatIndex].unreadCount 
             : (updatedChats[chatIndex].unread || 0);
 
-          // On met à jour directement l'item existant
           updatedChats[chatIndex] = {
             ...updatedChats[chatIndex],
             lastMessage: newMessage.content,
             date: new Date().toISOString(),
-            unreadCount: currentUnread + 1 // Incrémentation dynamique visible immédiatement
+            unreadCount: currentUnread + 1
           };
         } else {
-          // La ligne n'existe pas encore : création de l'élément à la volée en haut de liste
           updatedChats.unshift({
             _id: isGroup ? targetId : undefined,
             contact: isGroup ? undefined : { 
@@ -286,8 +279,6 @@ export default function InboxScreen({ navigation }) {
             isGroup: isGroup
           });
         }
-
-        // Tri immédiat pour faire remonter le nouveau message tout en haut
         return updatedChats.sort((a, b) => new Date(b.date) - new Date(a.date));
       });
     };
@@ -299,18 +290,16 @@ export default function InboxScreen({ navigation }) {
       global.socket.off('new_private_message', handleNewMessage);
       global.socket.off('new_group_message', handleNewMessage);
     };
-  }, [global.currentUser?._id]); // Re-bind automatique si l'ID utilisateur change
+  }, [global.currentUser?._id]);
 
   const smartCollaborators = useMemo(() => {
-    const seen = new Set();
-    return chats
-      .filter(item => item?.contact && !item?.isGroup && item?.contact?._id)
-      .filter(item => {
-        if (seen.has(item.contact._id)) return false;
-        seen.add(item.contact._id);
-        return true;
-      })
-      .map(item => item.contact);
+    const collabMap = new Map();
+    chats.forEach(item => {
+      if (item?.contact?._id && !item?.isGroup) {
+        collabMap.set(item.contact._id, item.contact);
+      }
+    });
+    return Array.from(collabMap.values());
   }, [chats]);
 
   const handleLongPress = useCallback((chat) => {
@@ -359,9 +348,13 @@ export default function InboxScreen({ navigation }) {
             <View style={styles.addIconWrapper}><PlusCircle size={28} color={COLORS.primary} /></View>
             <Text style={styles.collabName}>Nouveau</Text>
           </TouchableOpacity>
-          {smartCollaborators.map((user) => (
-            <CollabAvatar key={`collab-${user._id}`} user={user} navigation={navigation} />
-          ))}
+          {smartCollaborators.length > 0 ? (
+            smartCollaborators.map((user) => (
+              <CollabAvatar key={`collab-${user._id}`} user={user} navigation={navigation} />
+            ))
+          ) : (
+            <Text style={styles.emptyCollabText}>Aucun collaborateur actif</Text>
+          )}
         </ScrollView>
       </View>
       <Text style={styles.sectionTitle}>Discussions récentes</Text>
@@ -434,4 +427,5 @@ const styles = StyleSheet.create({
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#020617' },
   emptyContainer: { alignItems: 'center', marginTop: 60 },
   emptyText: { color: '#475569', fontSize: 14, textAlign: 'center' },
+  emptyCollabText: { color: '#475569', fontSize: 12, marginLeft: 10, alignSelf: 'center', fontStyle: 'italic' },
 });

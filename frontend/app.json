@@ -34,13 +34,17 @@
           "icon": "./assets/icon.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-2956617888770116~6315221391",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ],
+      "expo-audio",
+      "expo-video"
     ],
-    "extra": {
-      "eas": {
-        "projectId": "76d3bed7-e1f3-46a7-ae09-d55699002793"
-      }
-    },
     "owner": "mtal"
   }
 }
