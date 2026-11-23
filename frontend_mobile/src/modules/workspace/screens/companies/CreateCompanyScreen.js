@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Switch, ActivityIndicator, Alert, Image } from 'react-native';
-import { ArrowLeft, Building2, MapPin, Wallet, Users, FileText, Image as ImageIcon, Camera } from 'lucide-react-native';
+import { ArrowLeft, Building2, MapPin, Wallet, Users, FileText, Image as ImageIcon } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker'; 
-import { useCompany } from '../../context/CompanyContext';
+import { useCompany } from '../../context/CompanyContext'; // 👈 Utilisation du CompanyContext
 
 export default function CreateCompanyScreen({ navigation }) {
-  const { createCompany } = useCompany();
+  const { createCompany } = useCompany(); // 👈 Récupération de createCompany
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -16,11 +16,7 @@ export default function CreateCompanyScreen({ navigation }) {
   const [investment, setInvestment] = useState('');
   const [employees, setEmployees] = useState('');
   const [website, setWebsite] = useState('');
-  
-  // États séparés pour la couverture et le logo
-  const [bgImageUri, setBgImageUri] = useState('');
-  const [logoUri, setLogoUri] = useState('');
-
+  const [imageUri, setImageUri] = useState(null); 
   const [isPublic, setIsPublic] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,30 +44,16 @@ export default function CreateCompanyScreen({ navigation }) {
     'Tertiaire'
   ];
 
-  // Fonction générique pour sélectionner une image
-  const pickImage = async (typeTarget) => {
+  const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission requise', 'L\'autorisation d\'accéder aux photos est nécessaire.');
       return;
     }
-
-    const aspect = typeTarget === 'logo' ? [1, 1] : [16, 9];
-
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
-      allowsEditing: true, 
-      aspect: aspect, 
-      quality: 0.7,
+      mediaTypes: ['images'], allowsEditing: true, aspect: [16, 9], quality: 0.7,
     });
-
-    if (!result.canceled) {
-      if (typeTarget === 'logo') {
-        setLogoUri(result.assets[0].uri);
-      } else {
-        setBgImageUri(result.assets[0].uri);
-      }
-    }
+    if (!result.canceled) setImageUri(result.assets[0].uri);
   };
 
   const handleCreate = async () => {
@@ -82,22 +64,26 @@ export default function CreateCompanyScreen({ navigation }) {
 
     setIsSubmitting(true);
     try {
-      const companyData = {
-        name: name.trim(),
-        description: description.trim(),
-        type: type, 
-        sector: sector,
-        location: location.trim(),
-        investment: investment.trim() || '0M',
-        staffCount: parseInt(employees.trim(), 10) || 0,
-        website: website.trim() || '',
-        isPublic: isPublic,
-        status: 'active',
-        bgImage: bgImageUri || '',
-        logo: logoUri || '' // Ajout du logo dans l'objet envoyé
-      };
+      const formData = new FormData();
+      formData.append('name', name.trim());
+      formData.append('description', description.trim());
+      formData.append('type', type); 
+      formData.append('sector', sector);
+      formData.append('location', location.trim());
+      formData.append('investment', investment.trim() || '0M');
+      formData.append('staffCount', String(parseInt(employees.trim(), 10) || 0));
+      formData.append('website', website.trim() || '');
+      formData.append('isPublic', isPublic ? 'true' : 'false'); 
+      formData.append('status', 'active');
 
-      await createCompany(companyData); 
+      if (imageUri) {
+        const filename = imageUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(filename || '');
+        const mimeType = match ? `image/${match[1]}` : 'image/jpeg';
+        formData.append('bgImage', { uri: imageUri, name: filename || 'company_bg.jpg', type: mimeType });
+      }
+
+      await createCompany(formData); // 👈 Appel de la fonction du CompanyContext
       
       Alert.alert('Succès 🎉', 'Structure enregistrée avec succès !');
       navigation.goBack();
@@ -123,38 +109,15 @@ export default function CreateCompanyScreen({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Section Visuels : Couverture & Logo */}
-        <Text style={styles.inputLabel}>Visuels de l'organisation</Text>
-        
-        {/* 1. Photo de couverture (16:9) */}
-        <TouchableOpacity style={styles.imagePickerContainer} onPress={() => pickImage('bg')}>
-          {bgImageUri ? (
-            <Image source={{ uri: bgImageUri }} style={styles.previewImage} />
-          ) : (
+        <Text style={styles.inputLabel}>Visuel de l'organisation</Text>
+        <TouchableOpacity style={styles.imagePickerContainer} onPress={pickImage}>
+          {imageUri ? <Image source={{ uri: imageUri }} style={styles.previewImage} /> : (
             <View style={styles.imagePlaceholder}>
               <ImageIcon color="#64748B" size={24} />
-              <Text style={styles.imagePlaceholderText}>Sélectionner une photo de couverture (16:9)</Text>
+              <Text style={styles.imagePlaceholderText}>Sélectionner une photo (16:9)</Text>
             </View>
           )}
         </TouchableOpacity>
-
-        {/* 2. Logo (Rond/Carré 1:1) */}
-        <View style={styles.logoSectionContainer}>
-          <TouchableOpacity style={styles.logoPickerContainer} onPress={() => pickImage('logo')}>
-            {logoUri ? (
-              <Image source={{ uri: logoUri }} style={styles.previewLogo} />
-            ) : (
-              <View style={styles.logoPlaceholder}>
-                <Camera color="#64748B" size={20} />
-              </View>
-            )}
-          </TouchableOpacity>
-          <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.logoLabelTitle}>Logo de l'organisation</Text>
-            <Text style={styles.logoLabelSubtitle}>Format carré ou rond recommandé</Text>
-          </View>
-        </View>
 
         <Text style={styles.inputLabel}>Nom de l'organisation *</Text>
         <View style={styles.inputContainer}>
@@ -228,26 +191,15 @@ const styles = StyleSheet.create({
   navSubtitle: { fontSize: 12, color: '#64748B' },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 100 },
   inputLabel: { color: '#94A3B8', fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 12 },
-  
-  // Couverture
-  imagePickerContainer: { width: '100%', height: 130, backgroundColor: '#111726', borderWidth: 1, borderStyle: 'dashed', borderColor: '#334155', borderRadius: 16, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  previewImage: { width: '100%', height: '100%' },
-  imagePlaceholder: { alignItems: 'center' },
-  imagePlaceholderText: { color: '#64748B', fontSize: 12, marginTop: 6 },
-
-  // Logo (Rond)
-  logoSectionContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15, backgroundColor: '#111726', padding: 10, borderRadius: 16, borderWidth: 1, borderColor: '#1E293B' },
-  logoPickerContainer: { width: 65, height: 65, backgroundColor: '#1E293B', borderRadius: 32.5, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#334155' },
-  previewLogo: { width: '100%', height: '100%' },
-  logoPlaceholder: { justifyContent: 'center', alignItems: 'center' },
-  logoLabelTitle: { color: '#FFF', fontSize: 13, fontWeight: '700' },
-  logoLabelSubtitle: { color: '#64748B', fontSize: 11, marginTop: 2 },
-
   inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#111726', borderWidth: 1, borderColor: '#1E293B', borderRadius: 14, height: 48, paddingHorizontal: 12, marginBottom: 12 },
   textAreaContainer: { height: 90, alignItems: 'flex-start' },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, color: '#F1F5F9' },
   textArea: { textAlignVertical: 'top', paddingVertical: 10 },
+  imagePickerContainer: { width: '100%', height: 140, backgroundColor: '#111726', borderWidth: 1, borderStyle: 'dashed', borderColor: '#334155', borderRadius: 16, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
+  previewImage: { width: '100%', height: '100%' },
+  imagePlaceholder: { alignItems: 'center' },
+  imagePlaceholderText: { color: '#64748B', fontSize: 12, marginTop: 6 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
   sectorRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 },
   sectorBadge: { backgroundColor: '#111726', borderWidth: 1, borderColor: '#1E293B', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, marginRight: 8, marginBottom: 8 },

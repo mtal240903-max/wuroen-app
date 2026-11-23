@@ -26,7 +26,7 @@ const companyController = require('../controllers/company');
 // Toutes les routes nécessitent d'être authentifié
 router.use(protect);
 
-// Routes de liste et création
+// Routes de liste et création (⚠️ Remise de upload.single('bgImage') pour capturer l'image si elle existe, tout en gérant le JSON)
 router.get('/', companyController.getCompanies);
 router.post('/', upload.single('bgImage'), companyController.createCompany); 
 router.get('/:id', companyController.getCompanyById);
@@ -34,9 +34,8 @@ router.get('/:id', companyController.getCompanyById);
 // Routes de gestion
 router.patch('/:id', upload.single('bgImage'), companyController.updateCompany);
 
-// Routes Staff (Ajout de .get() pour la récupération de la liste)
+// Routes Staff
 router.route('/:id/staff')
-  .get(companyController.getCompanyStaff)
   .post(companyController.addCompanyStaff);
 
 router.delete('/:id/staff/:staffId', companyController.removeCompanyStaff);

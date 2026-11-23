@@ -1,5 +1,4 @@
 const Company = require('../../models/Company');
-const Project = require('../../models/Project'); // Assurez-vous d'importer votre modèle Project
 
 module.exports = async (req, res) => {
   try {
@@ -11,26 +10,22 @@ module.exports = async (req, res) => {
       return res.status(404).json({ success: false, message: "Structure introuvable." });
     }
 
-    // 🔒 CONTRÔLE DE CONFIDENTIALITÉ
+    // 🔒 CONTRÔLE DE CONFIDENTIALITÉ : L'utilisateur est-il le propriétaire ou l'entreprise est-elle publique ?
     const isOwner = company.user.toString() === userId.toString();
+
     if (!isOwner && !company.isPublic) {
       return res.status(403).json({ success: false, message: "Accès refusé. Cette structure est privée." });
     }
 
-    // 🛠️ Récupération des projets liés à cette compagnie
-    const projects = await Project.find({ company: companyId }).sort({ createdAt: -1 });
-
+    // Si vous gérez du personnel lié directement à l'entreprise, vous pouvez l'adapter ici. 
+    // Sinon, on renvoie simplement l'entreprise.
     return res.status(200).json({ 
       success: true, 
-      data: { 
-        company, 
-        staff: company.staff || [], 
-        projects // <-- On inclut enfin les projets ici !
-      } 
+      data: { company, staff: [] } 
     });
 
   } catch (error) {
     console.error("Erreur de récupération de la structure:", error);
-    return res.status(500).json({ success: false, message: "Erreur serveur", error: error.message });
+    return res.status(500).json({ success: false, message: "Erreur de confidentialité", error: error.message });
   }
 };

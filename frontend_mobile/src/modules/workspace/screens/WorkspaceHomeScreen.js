@@ -95,7 +95,6 @@ export default function WorkspaceHomeScreen({ navigation }) {
           <GridCard 
             title="Finance" subtitle="Suivi & Analyses" percent={60} progressColor="#EF4444"
             colors={['#2A1B1F', '#0F172A']} icon={LineChart} 
-            onPress={() => navigation.navigate('FinanceOverview')} 
           />
           <GridCard 
             title="Équipes" subtitle={`${stats.membersCount || 0} membres`} percent={90} progressColor="#8B5CF6"

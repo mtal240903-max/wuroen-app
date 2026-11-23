@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions
 import { ArrowLeft, SlidersHorizontal, Plus, Bell, MoreVertical, Briefcase, Users, Wallet, FileText, Landmark, BarChart3 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
-import api from '../../../../services/api'; 
+import api from '../../../../services/api'; // 🛠️ Import corrigé en minuscule pour correspondre à l'instance exportée
 
 const { width } = Dimensions.get('window');
 
@@ -19,8 +19,8 @@ const StatCard = React.memo(({ icon, count, label, trend, trendColor }) => (
   </View>
 ));
 
-const QuickActionBtn = React.memo(({ icon, label, bgColor, onPress }) => (
-  <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8} onPress={onPress}>
+const QuickActionBtn = React.memo(({ icon, label, bgColor }) => (
+  <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8}>
     <View style={[styles.quickActionIconContainer, { backgroundColor: bgColor }]}>
       {icon}
     </View>
@@ -46,13 +46,7 @@ const CompanyGridCard = React.memo(({ item, onPress }) => {
         <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
           <Text style={[styles.statusText, { color: statusStyle.text }]}>{statusStyle.label}</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.moreBtn} 
-          onPress={(e) => {
-            e.stopPropagation();
-            Alert.alert("Options", `Options pour ${item.name}`);
-          }}
-        >
+        <TouchableOpacity style={styles.moreBtn} onPress={(e) => e.stopPropagation()}>
           <MoreVertical color="#FFF" size={16} />
         </TouchableOpacity>
       </View>
@@ -87,11 +81,11 @@ const CompanyGridCard = React.memo(({ item, onPress }) => {
 
         <View style={styles.progressSection}>
           <View style={styles.progressTexts}>
-            <Text style={styles.progressPercent}>{item.progress || 0}%</Text>
+            <Text style={styles.progressPercent}>0%</Text>
             <Text style={styles.progressLabel}>Progression</Text>
           </View>
           <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${item.progress || 0}%`, backgroundColor: statusStyle.text }]} />
+            <View style={[styles.progressBarFill, { width: `0%`, backgroundColor: statusStyle.text }]} />
           </View>
         </View>
       </View>
@@ -106,7 +100,7 @@ export default function CompaniesScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Statistiques calculées dynamiquement
+  // Rangées statistiques calculées dynamiquement
   const stats = useMemo(() => {
     const total = companies.length;
     const actives = companies.filter(c => c.status === 'active' || c.status === 'En activité').length;
@@ -114,7 +108,7 @@ export default function CompaniesScreen({ navigation }) {
     return { total, actives, creation };
   }, [companies]);
 
-  // Chargement des données réelles depuis l'API
+  // Chargement des données réelles depuis la route API /companies via l'instance `api` en minuscule
   const loadCompaniesData = async () => {
     try {
       const response = await api.get('/companies'); 
@@ -122,13 +116,15 @@ export default function CompaniesScreen({ navigation }) {
       setCompanies(data);
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
-      Alert.alert("Erreur", `Impossible de charger les compagnies : ${errorMessage}`);
+      console.log("Erreur détaillée :", error.response || error);
+      Alert.alert("Erreur", `Détail : ${errorMessage}`);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  // Recharger automatiquement les données à chaque retour sur cet écran
   useFocusEffect(
     useCallback(() => {
       loadCompaniesData();
@@ -144,7 +140,7 @@ export default function CompaniesScreen({ navigation }) {
     if (activeTab === 'Toutes') return true;
     if (activeTab === 'Actives') return company.status === 'active' || company.status === 'En activité';
     if (activeTab === 'Création') return company.status === 'creation' || company.status === 'En création';
-    if (activeTab === 'En pause') return company.status === 'suspended' || company.status === 'En pause';
+    if (activeTab === 'En pause') return company.status === 'suspended';
     return true;
   });
 
@@ -160,18 +156,10 @@ export default function CompaniesScreen({ navigation }) {
           <Text style={styles.navSubtitle}>Gérez vos structures réelles</Text>
         </View>
         <View style={styles.navActions}>
-          <TouchableOpacity 
-            style={styles.iconAction} 
-            onPress={() => Alert.alert("Notifications", "Aucune nouvelle notification.")}
-          >
+          <TouchableOpacity style={styles.iconAction}>
             <Bell color="#FFF" size={20} />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.iconAction} 
-            onPress={() => Alert.alert("Filtres", "Options de tri avancées à venir.")}
-          >
-            <SlidersHorizontal color="#FFF" size={20} />
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconAction}><SlidersHorizontal color="#FFF" size={20} /></TouchableOpacity>
         </View>
       </View>
 
@@ -221,7 +209,7 @@ export default function CompaniesScreen({ navigation }) {
                 <CompanyGridCard 
                   key={company._id} 
                   item={company} 
-                  onPress={() => navigation.navigate('CompanyDetail', { companyId: company._id, companyData: company })}
+                  onPress={() => navigation.navigate('CompanyDetail', { companyId: company._id })}
                 />
               ))}
             </View>
@@ -246,30 +234,10 @@ export default function CompaniesScreen({ navigation }) {
               <Text style={styles.sectionMainTitle}>⚡ Actions rapides</Text>
               <Text style={styles.sectionSubtitle}>Accès direct</Text>
               <View style={styles.quickActionsGrid}>
-                <QuickActionBtn 
-                  icon={<FileText color="#C084FC" size={20} />} 
-                  label="Documentation" 
-                  bgColor="rgba(192, 132, 252, 0.15)" 
-                  onPress={() => Alert.alert("Documentation", "Accès à la documentation globale.")}
-                />
-                <QuickActionBtn 
-                  icon={<Landmark color="#34D399" size={20} />} 
-                  label="Financement" 
-                  bgColor="rgba(52, 211, 153, 0.15)" 
-                  onPress={() => Alert.alert("Financement", "Module de gestion des levées de fonds.")}
-                />
-                <QuickActionBtn 
-                  icon={<BarChart3 color="#60A5FA" size={20} />} 
-                  label="Rapports" 
-                  bgColor="rgba(96, 165, 250, 0.15)" 
-                  onPress={() => Alert.alert("Rapports", "Génération des rapports consolidés.")}
-                />
-                <QuickActionBtn 
-                  icon={<Users color="#FBBF24" size={20} />} 
-                  label="Partenaires" 
-                  bgColor="rgba(251, 191, 36, 0.15)" 
-                  onPress={() => Alert.alert("Partenaires", "Répertoire de vos partenaires.")}
-                />
+                <QuickActionBtn icon={<FileText color="#C084FC" size={20} />} label="Documentation" bgColor="rgba(192, 132, 252, 0.15)" />
+                <QuickActionBtn icon={<Landmark color="#34D399" size={20} />} label="Financement" bgColor="rgba(52, 211, 153, 0.15)" />
+                <QuickActionBtn icon={<BarChart3 color="#60A5FA" size={20} />} label="Rapports" bgColor="rgba(96, 165, 250, 0.15)" />
+                <QuickActionBtn icon={<Users color="#FBBF24" size={20} />} label="Partenaires" bgColor="rgba(251, 191, 36, 0.15)" />
               </View>
             </View>
           </View>

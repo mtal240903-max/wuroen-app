@@ -1,5 +1,5 @@
-// Configure l'adresse du serveur avec EXPO_PUBLIC_API_URL dans .env.local.
-export const BASE_URL = (process.env.EXPO_PUBLIC_API_URL || 'http://192.168.184.109:5000/api').replace(/\/$/, '');
+// L'URL publique est configurable avec EXPO_PUBLIC_API_URL dans .env.local.
+export const BASE_URL = (process.env.EXPO_PUBLIC_API_URL || 'https://wuroen-app.onrender.com/api').replace(/\/$/, '');
 
 export const ENDPOINTS = {
   login: `${BASE_URL}/auth/login`,
@@ -11,5 +11,4 @@ export const ENDPOINTS = {
   users: `${BASE_URL}/users`,
 };
 
-const API_BASE_URL = BASE_URL;
-export default API_BASE_URL;
+export default BASE_URL;

@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
     const userId = req.user?.id || req.user?._id;
 
     console.log("Données reçues (body) :", req.body);
-    console.log("Fichiers reçus (files/file) :", req.files || req.file);
+    console.log("Fichier reçu (file) :", req.file);
     console.log("Utilisateur ID détecté :", userId);
 
     if (!userId) {
@@ -14,25 +14,10 @@ module.exports = async (req, res) => {
 
     const { name, description, type, sector, location, investment, staffCount, website, isPublic } = req.body;
 
-    // Gestion de la photo de couverture (bgImage)
+    // Gestion de l'image (si envoyée via multer ou lien direct)
     let bgImage = req.body.bgImage || "";
-    if (req.files && req.files.bgImage && req.files.bgImage[0]) {
-      bgImage = req.files.bgImage[0].path || req.files.bgImage[0].filename;
-    } else if (req.file && req.fieldname === 'bgImage') {
-      bgImage = req.file.path || req.file.filename;
-    }
-
-    // Gestion du logo (logo)
-    let logo = req.body.logo || "";
-    if (req.files && req.files.logo && req.files.logo[0]) {
-      logo = req.files.logo[0].path || req.files.logo[0].filename;
-    } else if (req.file && req.fieldname === 'logo') {
-      logo = req.file.path || req.file.filename;
-    }
-
-    // Rétrocompatibilité si un fichier unique générique est envoyé
-    if (!bgImage && req.file && !req.fieldname) {
-      bgImage = req.file.path || req.file.filename;
+    if (req.file) {
+      bgImage = req.file.path || req.file.filename || bgImage;
     }
 
     const company = await Company.create({
@@ -40,13 +25,12 @@ module.exports = async (req, res) => {
       name: name?.trim(),
       description: description?.trim(),
       type,
-      sector: sector || 'Primaire', 
-      location: location?.trim() || 'Non spécifié', 
+      sector: sector || 'Primaire', // Valeur de secours si non définie
+      location: location?.trim() || 'Non spécifié', // Valeur de secours si non définie
       investment: investment || '0M',
       staffCount: parseInt(staffCount, 10) || 0,
       website: website || "",
       bgImage,
-      logo, // ➕ Enregistrement du logo de la structure
       isPublic: isPublic === 'true' || isPublic === true,
       status: 'active'
     });

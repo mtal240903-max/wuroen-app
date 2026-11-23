@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useCallback, useRef } from 'react';
-import api from '../services/axiosInstance'; // 👈 Assurez-vous que ce chemin pointe vers votre axiosInstance.js
+import api from '../../../services/api'; // Ajustez le chemin selon l'emplacement de votre fichier
 
 export const CompanyContext = createContext();
 

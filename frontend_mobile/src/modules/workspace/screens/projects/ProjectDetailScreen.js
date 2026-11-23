@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity } from 'react-native';
-import { ArrowLeft, MoreHorizontal, CheckCircle2, Clock, FileText, Download, Plus, Calendar, User } from 'lucide-react-native';
+import { ArrowLeft, MoreHorizontal, CheckCircle2, Clock, FileText, Download, Tag, AlignLeft, BarChart2, Plus } from 'lucide-react-native';
 
 export default function ProjectDetailScreen({ route, navigation }) {
   const { project } = route.params || {};
@@ -17,8 +17,8 @@ export default function ProjectDetailScreen({ route, navigation }) {
     );
   }
 
-  // Tâches dynamiques provenant du projet ou valeurs par défaut
-  const tasksList = project.tasks && project.tasks.length > 0 ? project.tasks : [
+  // Exemple de données pour les tâches (peut être remplacé par project.tasks)
+  const tasksList = project.tasks || [
     { id: 1, title: 'Étude du terrain', status: 'done' },
     { id: 2, title: 'Budget prévisionnel', status: 'in_progress' },
     { id: 3, title: 'Recherche de financement', status: 'pending' },
@@ -26,33 +26,26 @@ export default function ProjectDetailScreen({ route, navigation }) {
     { id: 5, title: 'Rapport final', status: 'pending' },
   ];
 
-  const documentsList = project.documents && project.documents.length > 0 ? project.documents : [
-    'Plan_technique.pdf', 
-    'Budget_previsionnel.xlsx'
-  ];
-
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         
         {/* Photo de couverture */}
         <View style={styles.imageContainer}>
           {project.imageUrl ? (
             <Image source={{ uri: project.imageUrl }} style={styles.headerImage} />
           ) : (
-            <View style={[styles.headerImage, styles.placeholderImage]}>
-              <Text style={styles.placeholderLogo}>{project.name ? project.name.charAt(0).toUpperCase() : 'W'}</Text>
+            <View style={[styles.headerImage, { backgroundColor: '#1E293B', justifyContent: 'center', alignItems: 'center' }]}>
+              <Text style={{ color: '#6366F1', fontWeight: 'bold', fontSize: 24 }}>W</Text>
             </View>
           )}
           
-          <View style={styles.imageOverlay} />
-
           {/* Boutons d'en-tête (Retour et Options) */}
-          <TouchableOpacity style={[styles.iconButton, { left: 20 }]} onPress={() => navigation.goBack()}>
-            <ArrowLeft color="#FFF" size={20} />
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ArrowLeft color="#FFF" size={22} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.iconButton, { right: 20 }]}>
-            <MoreHorizontal color="#FFF" size={20} />
+          <TouchableOpacity style={styles.optionsButton}>
+            <MoreHorizontal color="#FFF" size={22} />
           </TouchableOpacity>
         </View>
 
@@ -60,20 +53,15 @@ export default function ProjectDetailScreen({ route, navigation }) {
           
           {/* Titre et Chef de projet */}
           <Text style={styles.title}>{project.name || 'Construction Ferme'}</Text>
-          <View style={styles.subTitleRow}>
-            <User color="#94A3B8" size={14} style={{ marginRight: 6 }} />
-            <Text style={styles.subTitle}>Chef de projet : <Text style={styles.managerName}>{project.manager || 'Ali O.'}</Text></Text>
-          </View>
+          <Text style={styles.subTitle}>Chef projet : {project.manager || 'Ali O.'}</Text>
           
           {/* Section Progression */}
-          <View style={styles.progressCard}>
-            <View style={styles.progressHeaderRow}>
-              <Text style={styles.progressLabel}>Progression globale</Text>
-              <Text style={styles.progressPercent}>{project.progress || 60}%</Text>
-            </View>
-            <View style={styles.progressBarBg}>
-              <View style={[styles.progressBarFill, { width: `${project.progress || 60}%` }]} />
-            </View>
+          <View style={styles.progressHeaderRow}>
+            <Text style={styles.progressLabel}>Progression</Text>
+            <Text style={styles.progressPercent}>{project.progress || 60}%</Text>
+          </View>
+          <View style={styles.progressBarBg}>
+            <View style={[styles.progressBarFill, { width: `${project.progress || 60}%` }]} />
           </View>
 
           {/* Onglets de navigation */}
@@ -95,29 +83,19 @@ export default function ProjectDetailScreen({ route, navigation }) {
               {tasksList.map((task, index) => (
                 <View key={task.id || index} style={styles.taskRow}>
                   <View style={styles.taskLeft}>
-                    <View style={styles.taskIconContainer}>
-                      <FileText color="#6366F1" size={16} />
-                    </View>
+                    <FileText color="#3B82F6" size={18} style={{ marginRight: 10 }} />
                     <Text style={styles.taskTitle}>{task.title}</Text>
                   </View>
                   
                   {/* Statut de la tâche */}
                   {task.status === 'done' && (
-                    <View style={[styles.badge, styles.badgeDone]}>
-                      <CheckCircle2 color="#10B981" size={14} style={{ marginRight: 4 }} />
-                      <Text style={styles.badgeTextDone}>Terminé</Text>
-                    </View>
+                    <CheckCircle2 color="#10B981" size={20} />
                   )}
                   {task.status === 'in_progress' && (
-                    <View style={[styles.badge, styles.badgeProgress]}>
-                      <Clock color="#F59E0B" size={14} style={{ marginRight: 4 }} />
-                      <Text style={styles.badgeTextProgress}>En cours</Text>
-                    </View>
+                    <View style={styles.statusOrangeDot} />
                   )}
                   {task.status === 'pending' && (
-                    <View style={[styles.badge, styles.badgePending]}>
-                      <Text style={styles.badgeTextPending}>En attente</Text>
-                    </View>
+                    <Text style={styles.statusPendingText}>En attente</Text>
                   )}
                 </View>
               ))}
@@ -125,32 +103,22 @@ export default function ProjectDetailScreen({ route, navigation }) {
           )}
 
           {activeTab === 'Détails' && (
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitleHeader}>À propos du projet</Text>
+            <View style={styles.sectionContainer}>
               <Text style={styles.descText}>
-                {project.description || 'Aucune description fournie pour ce projet. Ce module permet le suivi technique et opérationnel des activités de la structure.'}
+                {project.description || 'Aucune description fournie pour ce projet.'}
               </Text>
-              
-              {project.startDate && (
-                <View style={styles.metaInfoRow}>
-                  <Calendar color="#6366F1" size={16} style={{ marginRight: 8 }} />
-                  <Text style={styles.metaText}>Date de début : {project.startDate}</Text>
-                </View>
-              )}
             </View>
           )}
 
           {activeTab === 'Documents' && (
             <View style={styles.sectionContainer}>
               <View style={styles.card}>
-                {documentsList.map((doc, i) => (
+                {['Plan_technique.pdf', 'Budget_previsionnel.xlsx'].map((doc, i) => (
                   <View key={i} style={[styles.docRow, i > 0 && styles.docRowBorder]}>
-                    <View style={styles.taskIconContainer}>
-                      <FileText color="#94A3B8" size={16} />
-                    </View>
+                    <FileText color="#94A3B8" size={18} />
                     <Text style={styles.docName} numberOfLines={1}>{doc}</Text>
                     <TouchableOpacity style={styles.downloadBtn}>
-                      <Download color="#6366F1" size={16} />
+                      <Download color="#6366F1" size={18} />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -159,10 +127,8 @@ export default function ProjectDetailScreen({ route, navigation }) {
           )}
 
           {activeTab === 'Activité' && (
-            <View style={styles.sectionCard}>
-              <Text style={styles.descText}>
-                {project.recentActivity || 'Aucune activité récente enregistrée sur ce projet.'}
-              </Text>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.descText}>Aucune activité récente enregistrée.</Text>
             </View>
           )}
 
@@ -178,71 +144,53 @@ export default function ProjectDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F19' },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   centerContainer: { justifyContent: 'center', alignItems: 'center', padding: 20 },
-  errorText: { color: '#94A3B8', fontSize: 15, marginBottom: 20, textAlign: 'center' },
-  backBtnSimple: { backgroundColor: '#6366F1', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
+  errorText: { color: '#64748B', fontSize: 16, marginBottom: 20, textAlign: 'center' },
+  backBtnSimple: { backgroundColor: '#3B82F6', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
   backBtnText: { color: '#FFF', fontWeight: '600' },
   
-  imageContainer: { width: '100%', height: 240, position: 'relative', backgroundColor: '#1E293B' },
+  imageContainer: { width: '100%', height: 220, position: 'relative' },
   headerImage: { width: '100%', height: '100%', resizeMode: 'cover' },
-  placeholderImage: { justifyContent: 'center', alignItems: 'center' },
-  placeholderLogo: { color: '#6366F1', fontWeight: 'bold', fontSize: 32 },
-  imageOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  backButton: { position: 'absolute', top: 45, left: 20, backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: 8, borderRadius: 12 },
+  optionsButton: { position: 'absolute', top: 45, right: 20, backgroundColor: 'rgba(0, 0, 0, 0.4)', padding: 8, borderRadius: 12 },
   
-  iconButton: { position: 'absolute', top: 45, width: 38, height: 38, borderRadius: 12, backgroundColor: 'rgba(15, 23, 42, 0.6)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  content: { padding: 20, backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: -20 },
   
-  content: { padding: 20, backgroundColor: '#0B0F19', borderTopLeftRadius: 28, borderTopRightRadius: 28, marginTop: -30 },
+  title: { fontSize: 20, fontWeight: '700', color: '#0F172A', marginBottom: 4 },
+  subTitle: { fontSize: 13, color: '#64748B', marginBottom: 20 },
   
-  title: { fontSize: 22, fontWeight: '700', color: '#F8FAFC', marginBottom: 6 },
-  subTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  subTitle: { fontSize: 13, color: '#94A3B8' },
-  managerName: { color: '#CBD5E1', fontWeight: '600' },
+  progressHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  progressLabel: { fontSize: 14, fontWeight: '600', color: '#0F172A' },
+  progressPercent: { fontSize: 14, fontWeight: '600', color: '#0F172A' },
   
-  progressCard: { backgroundColor: '#111827', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: '#1F2937', marginBottom: 20 },
-  progressHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  progressLabel: { fontSize: 13, fontWeight: '600', color: '#CBD5E1' },
-  progressPercent: { fontSize: 13, fontWeight: '700', color: '#6366F1' },
-  
-  progressBarBg: { height: 8, backgroundColor: '#1F2937', borderRadius: 4, overflow: 'hidden' },
-  progressBarFill: { height: '100%', backgroundColor: '#6366F1', borderRadius: 4 },
+  progressBarBg: { height: 8, backgroundColor: '#F1F5F9', borderRadius: 4, overflow: 'hidden', marginBottom: 25 },
+  progressBarFill: { height: '100%', backgroundColor: '#2563EB', borderRadius: 4 },
 
   // Onglets
-  tabsRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#1F2937', marginBottom: 20 },
+  tabsRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#E2E8F0', marginBottom: 15 },
   tabItem: { flex: 1, paddingVertical: 12, alignItems: 'center' },
-  activeTabItem: { borderBottomWidth: 2, borderBottomColor: '#6366F1' },
+  activeTabItem: { borderBottomWidth: 2, borderBottomColor: '#2563EB' },
   tabText: { fontSize: 14, fontWeight: '500', color: '#64748B' },
-  activeTabText: { color: '#6366F1', fontWeight: '600' },
+  activeTabText: { color: '#2563EB', fontWeight: '600' },
 
   // Tâches
   tasksContainer: { marginTop: 5 },
-  taskRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#1F2937' },
-  taskLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 10 },
-  taskIconContainer: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(99, 102, 241, 0.1)', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-  taskTitle: { fontSize: 14, color: '#E2E8F0', fontWeight: '500', flex: 1 },
-  
-  // Badges de statut
-  badge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
-  badgeDone: { backgroundColor: 'rgba(16, 185, 129, 0.1)' },
-  badgeTextDone: { fontSize: 12, color: '#10B981', fontWeight: '600' },
-  badgeProgress: { backgroundColor: 'rgba(245, 158, 11, 0.1)' },
-  badgeTextProgress: { fontSize: 12, color: '#F59E0B', fontWeight: '600' },
-  badgePending: { backgroundColor: '#1F2937', paddingHorizontal: 10, paddingVertical: 5 },
-  badgeTextPending: { fontSize: 12, color: '#94A3B8', fontWeight: '500' },
+  taskRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  taskLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  taskTitle: { fontSize: 14, color: '#1E293B', fontWeight: '500' },
+  statusOrangeDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: '#F59E0B' },
+  statusPendingText: { fontSize: 12, color: '#94A3B8', fontWeight: '500' },
 
   // Sections alternatives
-  sectionCard: { backgroundColor: '#111827', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1F2937', marginTop: 5 },
-  sectionTitleHeader: { fontSize: 15, fontWeight: '600', color: '#F8FAFC', marginBottom: 8 },
-  descText: { color: '#94A3B8', lineHeight: 22, fontSize: 14 },
-  metaInfoRow: { flexDirection: 'row', alignItems: 'center', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: '#1F2937' },
-  metaText: { color: '#94A3B8', fontSize: 13 },
-  
-  card: { backgroundColor: '#111827', borderRadius: 16, padding: 6, borderWidth: 1, borderColor: '#1F2937' },
-  docRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 8 },
-  docRowBorder: { borderTopWidth: 1, borderTopColor: '#1F2937' },
-  docName: { flex: 1, marginLeft: 10, color: '#E2E8F0', fontSize: 14, fontWeight: '500' },
-  downloadBtn: { width: 32, height: 32, borderRadius: 8, backgroundColor: 'rgba(99, 102, 241, 0.1)', justifyContent: 'center', alignItems: 'center' },
+  sectionContainer: { marginTop: 15 },
+  descText: { color: '#64748B', lineHeight: 20, fontSize: 14 },
+  card: { backgroundColor: '#F8FAFC', borderRadius: 12, padding: 4, borderWidth: 1, borderColor: '#E2E8F0' },
+  docRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 12 },
+  docRowBorder: { borderTopWidth: 1, borderTopColor: '#E2E8F0' },
+  docName: { flex: 1, marginLeft: 10, color: '#1E293B', fontSize: 14, fontWeight: '500' },
+  downloadBtn: { padding: 6, backgroundColor: '#E2E8F0', borderRadius: 8 },
 
   // Bouton Flottant
-  floatingButton: { position: 'absolute', bottom: 30, right: 25, backgroundColor: '#6366F1', width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', shadowColor: '#6366F1', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 8, elevation: 6 }
+  floatingButton: { position: 'absolute', bottom: 30, right: 25, backgroundColor: '#2563EB', width: 56, height: 56, borderRadius: 28, justifyContent: 'center', alignItems: 'center', shadowColor: '#2563EB', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 }
 });

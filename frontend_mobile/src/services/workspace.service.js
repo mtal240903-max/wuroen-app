@@ -1,33 +1,33 @@
-import api from './api';
+import API from './api';
 
 export const workspaceService = {
-  // Récupérer les entreprises / pages de l'utilisateur
+  // Récupérer les espaces acceptés
   getMyWorkspaces: async () => {
-    const response = await api.get('/companies');
+    const response = await API.get('/workspaces/my-spaces');
     return response.data;
   },
-  
-  // Récupérer les invitations en attente (routes backend /team/invitations/pending)
+
+  // Créer un espace de travail
+  createWorkspace: async (name, plan = 'free') => {
+    const response = await API.post('/workspaces', { name, plan });
+    return response.data;
+  },
+
+  // Envoyer une invitation
+  inviteMember: async (workspaceId, email, role) => {
+    const response = await API.post(`/workspaces/${workspaceId}/invite`, { email, role });
+    return response.data;
+  },
+
+  // Récupérer les invitations en attente
   getPendingInvitations: async () => {
-    const response = await api.get('/team/invitations/pending');
+    const response = await API.get('/workspaces/invitations/pending');
     return response.data;
   },
 
-  // Créer une nouvelle entreprise/page
-  createWorkspace: async (name, plan) => {
-    const response = await api.post('/companies', { name, plan });
+  // Accepter ou refuser une invitation ('Accept' ou 'Decline')
+  respondToInvitation: async (workspaceId, action) => {
+    const response = await API.put(`/workspaces/${workspaceId}/invitations/respond`, { action });
     return response.data;
-  },
-
-  // Répondre à une invitation d'entreprise/page (PUT /api/team/:workspaceId/invitations/respond)
-  respondToInvitation: async (workspaceId, accept) => {
-    const response = await api.put(`/team/${workspaceId}/invitations/respond`, { accept });
-    return response.data;
-  },
-
-  // Inviter un membre à rejoindre spécifiquement une entreprise/page
-  inviteMember: async (companyId, email) => {
-    const response = await api.post(`/team/${companyId}/invite`, { email });
-    return response.data;
-  },
+  }
 };

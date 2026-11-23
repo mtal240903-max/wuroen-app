@@ -24,7 +24,7 @@ const CompanySchema = new mongoose.Schema({
     required: true, 
     enum: [    
       'Association', 
-      'Entreprise Individuelle',    
+      'Entreprise Individuelle',     
       'ONG', 
       'Organisation', 
       'Société',
@@ -71,10 +71,6 @@ const CompanySchema = new mongoose.Schema({
     type: String, 
     default: '' 
   },
-  logo: { // ➕ Ajout du champ pour le logo rond
-    type: String, 
-    default: '' 
-  },
   isPublic: { 
     type: Boolean, 
     default: false 
@@ -83,42 +79,7 @@ const CompanySchema = new mongoose.Schema({
     type: String, 
     enum: ['active', 'archived'], 
     default: 'active' 
-  },
-  staff: [{
-    userId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User', 
-      required: true 
-    },
-    level: { 
-      type: String, 
-      default: 'member' 
-    },
-    position: { 
-      type: String, 
-      default: 'Employé' 
-    },
-    memberStatus: { 
-      type: String, 
-      default: 'active_member' 
-    },
-    permissions: [{ 
-      type: String 
-    }]
-  }],
-  auditLog: [{
-    action: String,
-    performedBy: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User' 
-    },
-    ipAddress: String,
-    details: mongoose.Schema.Types.Mixed,
-    createdAt: { 
-      type: Date, 
-      default: Date.now 
-    }
-  }]
+  }
 }, { 
   timestamps: true,
   toJSON: { 
