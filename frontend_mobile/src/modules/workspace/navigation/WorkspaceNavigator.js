@@ -1,0 +1,64 @@
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+
+// Import du fournisseur de contexte unifié
+import { ProjectProvider } from '../../../modules/workspace/context/ProjectContext';
+
+// Import des écrans principaux
+import WorkspaceHomeScreen from '../screens/WorkspaceHomeScreen'; 
+import SelectWorkspaceScreen from '../screens/SelectWorkspaceScreen';
+import WorkspaceDashboardScreen from '../screens/WorkspaceDashboardScreen'; 
+import CreateWorkspaceScreen from '../screens/CreateWorkspaceScreen';
+
+// Import des écrans Projets
+import ProjectsScreen from '../screens/projects/ProjectsScreen'; 
+import CreateProjectScreen from '../screens/projects/CreateProjectScreen'; 
+import ProjectDetailScreen from '../screens/projects/ProjectDetailScreen'; 
+
+// Import des écrans Companies
+import CompaniesScreen from '../screens/companies/CompaniesScreen';
+import CreateCompanyScreen from '../screens/companies/CreateCompanyScreen'; 
+import CompanyDetailScreen from '../screens/companies/CompanyDetail/CompanyDetailScreen'; 
+import CompanyStaffScreen from '../screens/companies/CompanyStaffScreen';
+import OrganizationUnitsScreen from '../screens/companies/OrganizationUnit/OrganizationUnitsScreen';
+
+// IMPORT DE L'ÉCRAN FINANCE
+import FinanceOverviewScreen from '../screens/finance/FinanceOverviewScreen';
+
+const Stack = createStackNavigator();
+
+export default function WorkspaceNavigator() {
+  return (
+    <ProjectProvider>
+      <Stack.Navigator
+        initialRouteName="WorkspaceHome"
+        screenOptions={{
+          headerShown: false,
+          cardStyle: { backgroundColor: '#090D1A' },
+        }}
+      >
+        <Stack.Screen name="WorkspaceHome" component={WorkspaceHomeScreen} />
+        <Stack.Screen name="SelectWorkspace" component={SelectWorkspaceScreen} />
+        <Stack.Screen name="WorkspaceDashboard" component={WorkspaceDashboardScreen} />
+        
+        {/* Création de workspace */}
+        <Stack.Screen name="CreateWorkspaceScreen" component={CreateWorkspaceScreen} />
+        
+        {/* Projets */}
+        <Stack.Screen name="Projects" component={ProjectsScreen} />
+        <Stack.Screen name="CreateProject" component={CreateProjectScreen} />
+        <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+        
+        {/* Entreprises, Membres & Unités Organisationnelles */}
+        <Stack.Screen name="Companies" component={CompaniesScreen} />
+        <Stack.Screen name="CreateCompany" component={CreateCompanyScreen} />
+        <Stack.Screen name="CompanyDetail" component={CompanyDetailScreen} />
+        <Stack.Screen name="CompanyStaff" component={CompanyStaffScreen} />
+        <Stack.Screen name="OrganizationUnits" component={OrganizationUnitsScreen} />
+
+        {/* Finance */}
+        <Stack.Screen name="FinanceOverview" component={FinanceOverviewScreen} />
+      </Stack.Navigator>
+    </ProjectProvider>
+  );
+}

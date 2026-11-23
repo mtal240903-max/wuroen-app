@@ -34,7 +34,7 @@ const setRefreshCookie = (res, token) => {
   res.cookie('refreshToken', token, {
     httpOnly: true,   // ✅ Inaccessible au JavaScript côté client (protection XSS)
     secure:   process.env.NODE_ENV === 'production', // ✅ HTTPS uniquement en prod
-    sameSite: 'strict',  // ✅ Protection CSRF
+    sameSite: 'lax',  // ✅ Changé de 'strict' à 'lax' — nécessaire pour la redirection cross-site vers Hira
     maxAge:   30 * 24 * 60 * 60 * 1000 // 30 jours en ms
   });
 };
@@ -166,7 +166,8 @@ exports.login = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 exports.refreshToken = async (req, res) => {
   try {
-    const token = req.cookies?.refreshToken;
+    // ✅ MODIFICATION : On vérifie le cookie ET le corps de la requête (pour le mobile)
+    const token = req.cookies?.refreshToken || req.body.token;
 
     if (!token) {
       return res.status(401).json({ message: "Aucun refresh token fourni." });
@@ -187,26 +188,22 @@ exports.refreshToken = async (req, res) => {
       return res.status(401).json({ message: "Token invalide." });
     }
 
-    // ✅ Vérification que le compte est toujours actif au moment du refresh
     const user = await User.findById(decoded.id).select('+isBanned +isSuspended');
-    if (!user) {
-      return res.status(401).json({ message: "Compte introuvable ou supprimé." });
+    if (!user || user.isBanned || user.isSuspended) {
+      return res.status(403).json({ message: "Accès refusé." });
     }
 
-    if (user.isBanned) {
-      return res.status(403).json({ message: "Ce compte a été banni." });
-    }
-
-    if (user.isSuspended) {
-      return res.status(403).json({ message: "Ce compte est suspendu." });
-    }
-
-    // ✅ Rotation du refresh token à chaque renouvellement (sécurité renforcée)
-    const newAccessToken  = generateAccessToken(user._id);
+    const newAccessToken = generateAccessToken(user._id);
     const newRefreshToken = generateRefreshToken(user._id);
 
+    // ✅ Pour le Web : on met à jour le cookie
     setRefreshCookie(res, newRefreshToken);
-    res.json({ token: newAccessToken });
+    
+    // ✅ Pour le Mobile : on renvoie le nouveau Refresh Token dans le JSON
+    res.json({ 
+      token: newAccessToken,
+      refreshToken: newRefreshToken 
+    });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors du renouvellement de session." });
   }
@@ -219,7 +216,41 @@ exports.logout = (req, res) => {
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure:   process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    sameSite: 'lax' // ✅ Aligné sur 'lax' pour cohérence avec le setRefreshCookie
   });
   res.json({ message: "Déconnexion réussie." });
+};
+
+// ─────────────────────────────────────────────────────────────
+// 5. PASSERELLE SSO — Connexion vers Hira
+// ─────────────────────────────────────────────────────────────
+exports.connectToHira = async (req, res) => {
+  const { redirect_uri } = req.query;
+
+  if (!redirect_uri) {
+    return res.status(400).send('redirect_uri manquant');
+  }
+
+  const refreshToken = req.cookies?.refreshToken;
+
+  if (!refreshToken) {
+    // Pas connecté sur Wuro'en : renvoie vers Hira avec une erreur explicite
+    return res.redirect(`${redirect_uri}?error=not_authenticated`);
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    if (decoded.type !== 'refresh') throw new Error('invalid type');
+
+    const user = await User.findById(decoded.id);
+    if (!user || user.isBanned || user.isSuspended) {
+      return res.redirect(`${redirect_uri}?error=access_denied`);
+    }
+
+    // Génère un access token frais (15min, largement suffisant pour la vérification côté Hira)
+    const accessToken = generateAccessToken(user._id);
+    return res.redirect(`${redirect_uri}?token=${accessToken}`);
+  } catch (err) {
+    return res.redirect(`${redirect_uri}?error=session_expired`);
+  }
 };
