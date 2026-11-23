@@ -1,7 +1,7 @@
 import axios from 'axios'; // Ou votre instance axios personnalisée (ex: import api from '../../../services/api')
+import { BASE_URL } from '../../../../api/apiConfig';
 
-// Ajustez l'URL de base selon votre configuration backend
-const API_URL = 'http://localhost:5000/api'; 
+const API_URL = BASE_URL;
 
 export const companyService = {
   // Récupérer les détails complets d'une entreprise

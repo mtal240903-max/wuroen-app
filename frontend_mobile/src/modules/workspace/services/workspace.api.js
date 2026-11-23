@@ -1,8 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../../../api/apiConfig';
 
 const API = axios.create({
-  baseURL: 'http://192.168.132.213:5000/api',
+  baseURL: BASE_URL,
 });
 
 // Intercepteur pour injecter le token à chaque requête
@@ -27,7 +28,7 @@ API.interceptors.response.use(
       try {
         const refreshToken = await AsyncStorage.getItem('refreshToken');
         // Appel direct vers la route refresh
-        const { data } = await axios.post('http://192.168.132.213:5000/api/auth/refresh', { 
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
           token: refreshToken 
         });
         

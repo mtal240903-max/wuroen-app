@@ -2,11 +2,11 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { MoreVertical, Briefcase, Users, Wallet } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BASE_URL } from '../../../../api/apiConfig';
 
 const { width } = Dimensions.get('window');
 
-// 🌐 Remplacez par l'adresse IP de votre serveur backend
-const API_BASE_URL = 'http://192.168.229.69:5000';
+const API_BASE_URL = BASE_URL.replace(/\/api\/?$/, '');
 
 // Fonction utilitaire pour s'assurer que l'URL de l'image est complète
 const getImageUrl = (imagePath, defaultUrl) => {

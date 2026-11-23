@@ -7,13 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
+import { BASE_URL } from '../../api/apiConfig';
 import { COLORS } from '../../theme/theme';
 import { 
   FileUp, BookOpen, Tag, AlignLeft, Send, 
   CheckCircle, XCircle, FileText 
 } from 'lucide-react-native';
-
-const BASE_URL = 'http://192.168.207.238:5000/api';
 
 export default function AddResourceScreen({ navigation }) {
   const { userToken } = useContext(AuthContext);

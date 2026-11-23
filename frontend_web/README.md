@@ -5,7 +5,7 @@ Interface web React pour l’espace de recherche Wuro’en. La connexion, les ar
 ## Démarrer en local
 
 1. Démarrer l’API située dans `../backend` sur le port `5000`.
-2. Copier `.env.example` vers `.env.local` et régler `VITE_API_URL` si l’API n’est pas à `http://localhost:5000/api`.
+2. Copier `.env.example` vers `.env.local` et régler `VITE_API_URL` si l’API n’est pas à `https://wuroen-app.onrender.com/api`.
 3. Installer les dépendances puis lancer `npm run dev`.
 
 L’application web est disponible à l’adresse locale affichée par Vite. Les jetons de session sont conservés dans `sessionStorage`; le jeton de renouvellement reste dans le cookie HttpOnly fourni par l’API.
